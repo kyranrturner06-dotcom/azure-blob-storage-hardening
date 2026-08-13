@@ -94,6 +94,30 @@ Fixing the issues, I started with the activation time frame, I changed it from a
 _Image 10:_
 <img width="1007" height="715" alt="image" src="https://github.com/user-attachments/assets/390720ba-c82e-4900-bb36-b56d5adad619" />
 
+# <ins>**Private Endpoint Set-Up**</ins>
+
+Finally, I need to secure network access to the storage account, as so far the focus has been on identity based access. To do this I will restrict access to the storage account from the internet, and access will only be granted via a private endpoint pairing a VNet to the Storage Account. A requirement for this is that I set up a VNet within the resource group, which was done easily by searching 'Virtual Network' in the portal and configuring it to the resource group. It was only a simple VNet containing one Subnet as I do not need anything complex.
+
+**Private Endpoint**
+
+To create the private endpoint, I went to Storage Account > security + networking > Networking > Private Endpoints, the clicked 'Create'. Now onto the configuration, for the basics, I selected my resource group, which then auto-filled the region subscription. I also gave it the 'Private_Endpoint_Lab3' name. Under the resource tab, I set the Link type to Storage Accounts, selected my resource group, then selected the 'lab3storagekt' storage account. I put the Target Sub-resource as blob. For the Virtual Network tab I selected the VNet I had just created. DNS and Tags I left as default.
+
+With all of this done, I finally needed to turn off public internet access, which was done in the same 'Networking' panel within the storage account (Storage Account > security + networking > Networking). All I had to do was click on 'public network access' and set it to 'disable'.
+
+_Image Set 11:_
+<img width="653" height="810" alt="Screenshot 2026-08-13 173812" src="https://github.com/user-attachments/assets/b4aaf980-5c43-4fa2-b034-74a46d1d4854" />
+<img width="1151" height="270" alt="Screenshot 2026-08-13 174337" src="https://github.com/user-attachments/assets/1472d6e9-723a-4de7-973e-5fbfe576e93d" />
+<img width="1214" height="569" alt="Screenshot 2026-08-13 175122" src="https://github.com/user-attachments/assets/48d48e48-5010-47cf-bc2e-7d324146806a" />
+
+**Testing Private Endpoint Functionality**
+
+I was initially going to test this by getting a blob URL from a container within the private-linked storage account, however i realised I could not even do that because viewing was restricted to only traffic coming from within the VNet, so my browser was blocked. This is equally validating that the Private Endpoint works, so I was happy with the result and have attached a screenshot of the error message I received.
+
+In contrast, to test the functionality from within the VNet, I would need to deploy a VM inside the VNet to then SSH/RDP into the VM. This would mean when I try to access the container files in the storage account from the VM, access would be granted as the VM is inside the VNet. I will not be doing that in this lab however as setting up a VM is outside of its scope.
+
+_Image 12:_
+<img width="1430" height="563" alt="Screenshot 2026-08-13 175014" src="https://github.com/user-attachments/assets/4a24b61f-2bc7-457d-86b9-d68acc315a77" />
+
 
 
 
