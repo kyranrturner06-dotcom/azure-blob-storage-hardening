@@ -57,16 +57,48 @@ _Image 6:_
 **Diagnostics Settings**
 
 - I named the setting 'blob-audit-logs'
-- Category Group was set to 'audit' which essentially is a bundle of settings, similar to manually clicking 'Storage Read' (collects who read a blob), 'Storage Write' (collects who created/modified a blob), and 'Storage Delete' (collects who deleted a blob, which is very important).
+- For categories I manually clicked 'Storage Read' (collects who read a blob), 'Storage Write' (collects who created/modified a blob), and 'Storage Delete' (collects who deleted a blob, which is very important).
 - Destination Details was configured to send to Log Analytics Workspace, specifically the Log Analytics Workspace I created previously.
 
 _Image Set 7:_                       
-<img width="990" height="641" alt="Screenshot 2026-08-13 131712" src="https://github.com/user-attachments/assets/6bbd91eb-ac70-40b8-bb70-964f67e59c85" />
+<img width="949" height="611" alt="Screenshot 2026-08-13 141131" src="https://github.com/user-attachments/assets/357c78ad-1191-4380-bc5c-a64ce805ea6a" />
 <img width="747" height="192" alt="image" src="https://github.com/user-attachments/assets/01dc8d4f-9393-4e43-9e18-d66056d9460c" />
 
 **KQL Query Tests**
 
-To ensure the diagnostic data was correctly being ingested by Log Analytics, I ran a KQL query to see if results registered. This meant I needed something to get results from, so for that purpose I created a container within the storage account, uploaded a file, then deleted the container. This should trigger Storage Write and Storage Delete rules, creating 'PutBlob' and 'DeleteBlob' entries.
+To ensure the diagnostic data was correctly being ingested by Log Analytics, I ran a KQL query to see if results registered. This meant I needed something to get results from, so for that purpose I created a container within the storage account, uploaded a file, then deleted the file placed in the container. This should trigger Storage Write and Storage Delete rules, creating 'PutBlob' and 'DeleteBlob' entries.
+
+The KQL Query:
+- The 'Where' line determines what rows I want to filter by, here it says 'return rows which have PutBlob or DeleteBlob in the OperationName column'
+- The 'Project' line determines what columns I want returned, so the specified columns will have their results returned as long as PutBlob or DeleteBlob is in the same row.
+- The 'Order By' line simply defines how the results should be sorted, in this case it is by their date, and set to descending.
+- Finally, the | operator links all of the commands together, so they act with context to each other.
+
+_Image 8:_   
+<img width="1113" height="582" alt="Screenshot 2026-08-13 154146" src="https://github.com/user-attachments/assets/15bd14cd-e52c-46df-98fc-8a52aa5bb804" />
+
+# <ins>**Over-Privileged SAS Token**</ins>
+
+I purposely created an SAS token with too many permissions. To start, the SAS token expires in a year, which is way too long for something which is meant to be ephemeral. It is scoped to too many services and resources, breaking the concept of least-privilege, you can see this as all options for Allowed services & Allowed resource types are ticked. This isn't to mention that whoever gets hold of this SAS URL will have extremely high permissions, they can do anything they like to the Storage account.
+
+If this was to be leaked, which could happen via it being logged/messaged/committed in a repo, then the entire account would be compromised and there would be no way to revoke the permissions from a specific SAS, meaning you would have to regenerate the accounts storage keys to make the SAS void, by doing this you would also make all other SAS tokens signed with the same key void as well which will lock legitimate users out, impacting availability.
+
+_Image Set 9: (Cryptographic Signature [Sig=] I have redacted so access can't be achieved, this is a repo so that would be a leak.)_
+<img width="1885" height="852" alt="Screenshot 2026-08-13 160742" src="https://github.com/user-attachments/assets/b7675538-e2d4-4083-95ee-e3fb2d9163d8" />
+<img width="1648" height="362" alt="Screenshot 2026-08-13 161704" src="https://github.com/user-attachments/assets/30510a85-1f7f-47f6-be43-bfc1118dbecb" />
+
+**Correcting the SAS Token**
+
+Fixing the issues, I started with the activation time frame, I changed it from a year to an hour, SAS tokens are not meant to be long term. I then only allowed it to act upon the Blob Service, and specifically the Object resource inside the Blob. Then, set it to a read only token so the receiver can not make any modifications. On that topic, I also removed any Blob index permissions so they can not work with/modify index tags. Finally I added a specific IP address range to ensure more security on who can access the resource, even with the token.
+
+_Image 10:_
+<img width="1007" height="715" alt="image" src="https://github.com/user-attachments/assets/390720ba-c82e-4900-bb36-b56d5adad619" />
+
+
+
+
+
+
 
 
 
