@@ -47,6 +47,26 @@ _Image Set 5:_
 
 # <ins>**Enabling Diagnostic Logging**</ins>
 
+Visibility and Detection is a major part of security, enabling logging provides insight into what happened if an incident occurs, it's also important in regards to digital forensics. As a result, I will be configuring Storage Blob Diagnostics Logs to get sent to Log Analytics Workspace where they can be views and queried with KQL.
+
+To do this, I went to Storage Account > Monitoring > Diagnostics Settings, which brought up a selection of the different storage account sub-categories (blob, queue, table, file.) I specifically selected the Blob option to then click 'add diagnostics setting' which brought up a wizard where I could enable the collection of certain logs, and select where to send them.
+
+_Image 6:_                       
+<img width="1591" height="468" alt="Screenshot 2026-08-13 131238" src="https://github.com/user-attachments/assets/3e510310-3c61-4fe0-af1d-76ae8cfbd392" />
+
+**Diagnostics Settings**
+
+- I named the setting 'blob-audit-logs'
+- Category Group was set to 'audit' which essentially is a bundle of settings, similar to manually clicking 'Storage Read' (collects who read a blob), 'Storage Write' (collects who created/modified a blob), and 'Storage Delete' (collects who deleted a blob, which is very important).
+- Destination Details was configured to send to Log Analytics Workspace, specifically the Log Analytics Workspace I created previously.
+
+_Image Set 7:_                       
+<img width="990" height="641" alt="Screenshot 2026-08-13 131712" src="https://github.com/user-attachments/assets/6bbd91eb-ac70-40b8-bb70-964f67e59c85" />
+<img width="747" height="192" alt="image" src="https://github.com/user-attachments/assets/01dc8d4f-9393-4e43-9e18-d66056d9460c" />
+
+**KQL Query Tests**
+
+To ensure the diagnostic data was correctly being ingested by Log Analytics, I ran a KQL query to see if results registered. This meant I needed something to get results from, so for that purpose I created a container within the storage account, uploaded a file, then deleted the container. This should trigger Storage Write and Storage Delete rules, creating 'PutBlob' and 'DeleteBlob' entries.
 
 
 
